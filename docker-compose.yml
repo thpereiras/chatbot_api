@@ -1,0 +1,44 @@
+version: "3"
+services:
+
+  chatbot_api:
+    container_name: chatbot_api
+    build: .
+    ports:
+      - "3002:8080"
+    volumes:
+      - ./chatbot_api:/app
+    command: python app.py
+    depends_on:
+      - "chatbot_db"
+    environment:
+      VIRTUAL_HOST: 'chatbot.local'
+      VIRTUAL_PATH: '/api'
+      MYSQL_HOST: chatbot_db
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev
+      MYSQL_DATABASE: chatbot
+      MYSQL_PORT: 3306
+      ADMIN_NAME: 'Administrador'
+      ADMIN_USERNAME: 'admin'
+      ADMIN_PASSWORD: '<strong-password>'
+      SECRET_KEY: '<strong-secret>'
+      JWT_SECRET_KEY: '<strong-secret>'
+      JWT_ACCESS_TOKEN_EXPIRES_MINUTES: 1440
+      FLASK_ENV: development
+      DEBUG: 'True'
+      PORT: 8080
+
+  chatbot_db:
+    container_name: chatbot_db
+    image: jbergstroem/mariadb-alpine:10.4.17
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+     - ${PWD}/.mariadb:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev
+      MYSQL_DATABASE: chatbot
