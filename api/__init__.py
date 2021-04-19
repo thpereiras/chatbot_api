@@ -15,7 +15,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 logging.basicConfig(level=logging.INFO)
+
 global chatbot
+global default_response
+global minimum_confidence
+
+default_response = 'Desculpe, não entendi a sua pergunta.'
+minimum_confidence = float(os.getenv('MINIMUM_CONFIDENCE', 0.6))
 
 connection = pymysql.connect(
     host=os.environ['MYSQL_HOST'], user=os.environ['MYSQL_USER'], password=os.environ['MYSQL_PASSWORD'],
@@ -48,7 +54,7 @@ chatbot = ChatBot(
             'import_path': 'chatterbot.logic.BestMatch',
             'statement_comparison_function': comparisons.LevenshteinDistance, # LevenshteinDistance, SpacySimilarity, JaccardSimilarity
             'response_selection_method': get_random_response,
-            'default_response': 'Desculpe, não entendi a sua pergunta.',
+            'default_response': default_response,
             'maximum_similarity_threshold': 0.95,
             'threshold': 0.75
         }

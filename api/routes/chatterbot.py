@@ -1,6 +1,6 @@
 import os
 import sys
-from api import api, chatbot #, start_chatbot, start_flask
+from api import api, chatbot, default_response, minimum_confidence
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required
 
@@ -13,10 +13,10 @@ def talk():
     global chatbot
     content = request.json
     userText = content['message']
-
     userText = userText[:-1] if any(userText.endswith(x) for x in ('.','!',',',';','/','[',']','|','}','{')) else userText
+    botResponse = chatbot.get_response(userText)
 
-    botResponse = str(chatbot.get_response(userText))
-    print(userText, file=sys.stderr)
-    print(botResponse, file=sys.stderr)
-    return jsonify(response = botResponse), 200
+    if float(botResponse.confidence) > minimum_confidence:
+        return jsonify(response = str(botResponse)), 200
+    else:
+        return jsonify(response = default_response), 200
